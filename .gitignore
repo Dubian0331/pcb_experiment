@@ -1,0 +1,36 @@
+# MATLABの生成物
+*.asv      # MATLABの自動保存ファイル
+*.aps      # MATLABのApp Designer関連ファイル
+*.slx.orig # Simulinkファイルの競合解決時の一時ファイル
+*.p        # Pコードファイル (スクランブルされたMATLABコード)
+*.mex* # MEXファイル (コンパイルされたC/C++/Fortranコード)
+
+# MATLABのキャッシュ/設定ファイル
+.matlab/
+
+# シミュレーションデータや出力ファイル
+*.mat      # バイナリデータファイル (データによっては含めるべきか検討)
+*.fig      # FIGファイル (図の保存。コードで図を生成するなら不要)
+*.mldatx   # データログファイル (Simulinkなど)
+*.slx.r* # Simulinkのリビジョンファイル
+
+# OSが生成する一時ファイル（汎用的なものと重複しますが、ここに含めることも）
+.DS_Store
+Thumbs.db
+
+# IDEの設定ファイル（VS CodeでMATLABを扱う場合など）
+.vscode/
+.idea/
+
+# その他無視するファイル群
+*.csv
+*.png
+*.jpg
+*.txt
+*.pptx
+
+# その他無視するフォルダ
+raw_data/
+single_probe_data/
+Archived/
+MachProbe_data/
