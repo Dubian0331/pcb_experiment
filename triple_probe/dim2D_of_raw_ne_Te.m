@@ -5,14 +5,14 @@
 clear all;
 
 % ファイルのパス設定
-% date = 240610; % case-I
-date = 240611; % case-O
+date = 240610; % case-I
+% date = 240611; % case-O
 % filepath = "G:\My Drive\lab\lab_data\mach_probe_rawdata\"; % ファイルパス
 filepath = 'C:\\Users\\w-har\\OneDrive - The University of Tokyo\\Lab\\pcb_experiment\MachProbe_data\\';
 % shotlist = [18, 21, 24, 27, 33, 35, 38, 41, 47]; % case-I
-% shotlist = [18, 21, 24, 27, 33, 35, 38, 41]; % case-I
+shotlist = [18, 21, 24, 27, 33, 35, 38, 41]; % case-I
 % shotlist = [46, 49, 52, 55, 58, 61, 66, 69, 72]; % case-O
-shotlist = [46, 49, 52, 55, 58, 61, 66, 69]; % case-O
+% shotlist = [46, 49, 52, 55, 58, 61, 66, 69]; % case-O
 % shotlist = [72];
 % スプレッドシートからR方向データを取得
 DOCID = '1wG5fBaiQ7-jOzOI-2pkPAeV6SDiHc_LrOdcbWlvhHBw'; % スプレッドシートのID
@@ -168,8 +168,10 @@ for idx = 1:num_shots
 
         Te_matrix(valid_idx, :) = smoothdata(Te_matrix(valid_idx, :), 'movmedian', 7); % ウィンドウサイズは調整
         ne_matrix(valid_idx, :) = smoothdata(ne_matrix(valid_idx, :), 'movmedian', 7); % ウィンドウサイズは調整
+
+        plot_shotlist = [21, 33, 35];
          
-        if shot == shotlist(4) % あるいは確認したい特定のショット番号を指定 (例: if shot == 46)
+        if ismember(shot, plot_shotlist) % あるいは確認したい特定のショット番号を指定 (例: if shot == 46)
             figure('Name', ['Raw I2 and I3 for Shot ', num2str(shot)]);
             plot(time_raw, I2_raw_values, 'b-', 'DisplayName', 'I2 (Raw)');
             hold on;

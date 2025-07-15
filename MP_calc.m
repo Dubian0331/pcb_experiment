@@ -11,7 +11,7 @@ n_ch = 9;%マッハプローブCH数
     z_probe = [-0.08, -0.056, -0.032, -0.016, 0, 0.016, 0.032, 0.056, 0.08]; % マッハプローブ計測点Z座標[m]
     % ng_ch = [2, 3, 4, 5, 8, 9]; % 死んだCH 6/11
     % ng_ch = [3, 4, 5, 8, 9]; % 死んだCH 6/10
-    ng_ch = [3, 4, 5, 7, 8, 9];
+    ng_ch = MP.ng_ch;
     z_probe(ng_ch) = [];
     MPdata2D.zprobe = z_probe;
     r = linspace(min(MP.rlist),max(MP.rlist),MP.meshr)*1E-3;%プロットメッシュR座標[m]
@@ -20,6 +20,18 @@ n_ch = 9;%マッハプローブCH数
 
     cnt_r = zeros(numel(r_probe),1);
     flow = zeros(numel(MP.trange),n_ch,numel(r_probe),MP.shot);
+    
+    % 'I_ratio_modified' フォルダが存在するかどうかを判定
+    modified_folder_path = fullfile(pathname, num2str(MP.date), 'I_ratio_modified');
+    if isfolder(modified_folder_path)
+        % 存在すれば、ターゲットフォルダ名を'I_ratio_modified'に設定
+        target_folder = 'I_ratio_modified';
+    else
+        % 存在しなければ、ターゲットフォルダ名を'I_ratio'に設定
+        target_folder = 'I_ratio';
+    end
+    disp(target_folder);
+
     for i = 1:numel(MP.shotlist)
         idx_r = find(r_probe==MP.rlist(i)*1E-3);
         cnt_r(idx_r) = cnt_r(idx_r) + 1;
@@ -30,7 +42,7 @@ n_ch = 9;%マッハプローブCH数
         else 
             shotnum = num2str(shotnum);
         end
-        filename = strcat(pathname, '\\',  num2str(MP.date), '\\I_ratio\\', shotnum, '.csv');
+        filename = strcat(pathname, '\\',  num2str(MP.date), '\\', target_folder, '\\', shotnum, '.csv');
         MPdata = readmatrix(filename,'Range',sprintf('B%d:J%d',MP.trange(1)*10+2,MP.trange(end)*10+2));
         MPdata = MPdata ./ MPset.K * MPset.cs * 1E-3;
         flow(:,:,idx_r,cnt_r(idx_r)) = MPdata;

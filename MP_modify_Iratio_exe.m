@@ -1,10 +1,10 @@
 % --- I_ratio修正版を一括生成する処理 ---
 
-date = 240610;
+date = 240611;
 src_dir = 'C:/Users/w-har/OneDrive - The University of Tokyo/Lab/pcb_experiment/MachProbe_data';
 dst_dir = 'C:/Users/w-har/OneDrive - The University of Tokyo/Lab/pcb_experiment/MachProbe_data';
 
-for shotnum = 35:47
+for shotnum = 47:72
     try
         MP_modify_Iratio(date, shotnum, src_dir, dst_dir);
     catch ME

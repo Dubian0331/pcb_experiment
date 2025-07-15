@@ -1,9 +1,9 @@
 function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
-    axisfontsize = 30;
+    axisfontsize = 14;
     clim_values = [-40 40];  % カラーマップの範囲を指定
     
     % タイルレイアウトを作成
-    t = tiledlayout(MP.tate, MP.yoko, 'TileSpacing', 'compact', 'Padding', 'compact');
+    % t = tiledlayout(MP.tate, MP.yoko, 'TileSpacing', 'compact', 'Padding', 'compact');
     
     switch colorplot
         case {'flow_t'}
@@ -19,25 +19,26 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
                 contourf(grid2D.zq, grid2D.rq, data2D.psi(:, :, MP.trange(idx_t) - 399), -6e-3:0.4e-3:6e-3, 'k', 'Fill', 'off', 'LineWidth', 1);
                 colormap(redblue(300))
                 clim(clim_values)
+                disp([num2str(data2D.trange(MP.trange(idx_t) - 399)), ', ', num2str(MPdata2D.trange(idx_t))]);
                 
                 % マッハプローブの位置をプロット
                 % zprobe = [-0.08, -0.056, -0.032, -0.016, 0, 0.016, 0.032, 0.056, 0.08];
                 % [zprobe, rprobe] = meshgrid(zprobe, MPdata2D.rprobe);
                 % scatter(zprobe, rprobe, 20, 'black', 'filled')
                 hold on
-                title(['t=', num2str(MPdata2D.trange(idx_t) + MP.delay),' us'], 'FontSize', 30)
+                title(['t=', num2str(MPdata2D.trange(idx_t) + MP.delay),' us'], 'FontSize', 14)
 
                 % X軸とY軸のラベルを設定
                 if mod(i, MP.yoko) == 1
                     ylabel('r [m]', 'FontSize', axisfontsize);
                     ax = gca;
-                    ax.YAxis.FontSize = 30;
+                    ax.YAxis.FontSize = axisfontsize;
                 else
                     set(gca, 'YTickLabel', []);
                 end
                 if i > MP.yoko * (MP.tate - 1)
                     ax = gca;
-                    ax.XAxis.FontSize = 25;
+                    ax.XAxis.FontSize = axisfontsize;
                     xticks([-0.08 -0.032 0 0.032 0.08])
                     xlabel('z [m]', 'FontSize', axisfontsize);
                 else
@@ -51,15 +52,17 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
             % 共通のカラーバーを設定
             cb = colorbar;
             cb.Layout.Tile = 'east';
-            cb.FontSize = 30;
+            cb.FontSize = 14;
             cb.Label.String = 'Vt [km/s]';
         otherwise
             return
     end
 
     save_filepath = 'C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\MachProbe_data';
-    min_shots_num = min(MP.shotlist)
-    max_shots_num = max(MP.shotlist)
+    min_shots_num = min(MP.shotlist);
+    max_shots_num = max(MP.shotlist);
+
+    % --- 保存 ---
     mkdir(strcat(save_filepath, '\', num2str(date), '\output'));
-    saveas(gcf, strcat(save_filepath, '\', num2str(date), '\output\', num2str(min_shots_num), '-', num2str(max_shots_num), '_', num2str(MP.dt), '-us_mesh_', num2str(MP.mesh), '_mesh_r_', num2str(MP.meshr)), 'png');
+    saveas(gcf, strcat(save_filepath, '\', num2str(date), '\output\', num2str(min_shots_num), '-', num2str(max_shots_num), '_', num2str(MP.dt), 'us_', num2str(MP.start) ,'us-_mesh_', num2str(MP.mesh), '_mesh_r_', num2str(MP.meshr)), 'png');
 end
