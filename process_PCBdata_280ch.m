@@ -217,6 +217,12 @@ if doCalculation
         data2D.Bz(:,:,i)=data2D.Bz(:,:,i)./(2.*pi.*grid2D.rq);
         data2D.Bt(:,:,i)=B_t;
         data2D.Jt(:,:,i)= curl(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bz(:,:,i),data2D.Br(:,:,i))./(4*pi*1e-7);
+        % 追加
+        [~,dRBt_dR]             = gradient(grid2D.rq.*data2D.Bt(:,:,i),grid2D.zq(1,:),grid2D.rq(:,1));
+        [dBt_dZ,~]              = gradient(data2D.Bt(:,:,i),grid2D.zq(1,:),grid2D.rq(:,1));
+        data2D.Jz(:,:,i)        = 1./grid2D.rq.*dRBt_dR./(4*pi*1e-7);
+        data2D.Jr(:,:,i)        = -dBt_dZ./(4*pi*1e-7);
+        data2D.Lambda(:,:,i)    = (2*pi*grid2D.rq.*data2D.Bt(:,:,i))./(data2D.psi(:,:,i));
 
         if rgwflag
             timing = x/aquisition_rate==t;
