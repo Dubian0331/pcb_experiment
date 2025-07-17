@@ -4,11 +4,9 @@ trange = PCB.trange;
 start = PCB.start;
 
 [grid2D,data2D] = process_PCBdata_280ch(PCB,pathname);
-% [grid2D,data2D] = process_PCBdata_200ch(PCB,pathname);
 
 % ***********************************************
-
-if isstruct(grid2D)==0 %もしdtacqデータがない場合次のloopへ(データがない場合NaNを返しているため)
+if isstruct(grid2D)==0 % もしdtacqデータがない場合次のloopへ(データがない場合NaNを返しているため)
     return
 end
 
@@ -17,7 +15,6 @@ end
 % プロット部分
 figure('Position', [0 0 1500 1500],'visible','on');
 
-% figure('Position', [0 0 1500 1500],'visible','on');
 % start=30;
 dt = PCB.dt;
 %  t_start=470+start;
@@ -26,26 +23,34 @@ E_eff = zeros(1,16);
 mergingRatio = zeros(1,16);
 % PCB.type = 0;
 times = trange(1)+start:dt:trange(1)+start+dt*15;
+
+layout = tiledlayout(4,4,'Padding','compact','TileSpacing','compact');
+    
  for m=1:16 %図示する時間
      i=start+(m-1)*dt; %start+400μsからdtごとに取得
      t=trange(i+1); %startが60なら460μsのデータを取る
-     subplot(4,4,m);
+    %  subplot(4,4,m);
+    nexttile; 
 
      switch(PCB.type)
         case 0
             contour(grid2D.zq(1,:),grid2D.rq(:,1),squeeze(data2D.psi(:,:,i)),10,'black','LineWidth',2);
         case 1
-            contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.psi(:,:,i),40,'LineStyle','none');clim([-5e-3,5e-3])%psi
+            contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.psi(:,:,i),40,'LineStyle','none');
+            clim([-5e-3,5e-3]); % psi
         case 2
-            contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bz(:,:,i),30,'LineStyle','none');clim([-0.1,0.1])%Bz
+            contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bz(:,:,i),30,'LineStyle','none');
+            clim([-0.1,0.1]); % Bz
         case 3
-            % contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bt(:,:,i),40,'LineStyle','none');clim([0,0.3])%Bt
+            contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bt(:,:,i),40,'LineStyle','none'); 
+            clim([-0.08,0.08]); %Bt
             % contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bt(:,:,i),-100e-3:0.5e-3:100e-3,'LineStyle','none')
-            contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bt_th(:,:,i),-100e-3:0.5e-3:100e-3,'LineStyle','none')
+            % contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Bt_th(:,:,i),-100e-3:0.5e-3:100e-3,'LineStyle','none')
         case 4
             contourf(grid2D.zq(1,:),grid2D.rq(:,1),data2D.Br(:,:,i),30,'LineStyle','none');clim([-0.1,0.1])%Br
         case 5
-            contourf(grid2D.zq(1,:),grid2D.rq(:,1),-1.*data2D.Et(:,:,i),20,'LineStyle','none');clim([-500,400])%Et
+            contourf(grid2D.zq(1,:),grid2D.rq(:,1),-1.*data2D.Et(:,:,i),20,'LineStyle','none');
+            clim([-500,400]) % Et
             % 時刻iにおけるx点の[r,z]座標（インデックス）を取得
             idxR = knnsearch(grid2D.rq(:,1),xPointList.r(i));
             idxZ = knnsearch(grid2D.zq(1,:).',xPointList.z(i));
@@ -112,25 +117,24 @@ times = trange(1)+start:dt:trange(1)+start+dt*15;
     colormap(jet)
     axis image
     axis tight manual
-%     caxis([-0.8*1e+6,0.8*1e+6]) %jt%カラーバーの軸の範囲
+    % caxis([-0.8*1e+6,0.8*1e+6]) %jt%カラーバーの軸の範囲
     % clim([-0.1,0.1])%Bz
-     % clim([0,0.3])%Bt
+    %  clim([0,0.3])%Bt
     % clim([-5e-3,5e-3])%psi
     % clim([-500,400])%Et
-%     colorbar('Location','eastoutside')
-    %カラーバーのラベル付け
-%     c = colorbar;
-%     c.Label.String = 'Jt [A/m^{2}]';
+    % colorbar('Location','eastoutside')
+    % カラーバーのラベル付け
+    % c = colorbar;
+    % c.Label.String = 'Jt [A/m^{2}]';
     hold on
-%     plot(grid2D.zq(1,squeeze(mid(:,:,i))),grid2D.rq(:,1))
-%     contour(grid2D.zq(1,:),grid2D.rq(:,1),squeeze(data2D.psi(:,:,i)),20,'black')
+    % plot(grid2D.zq(1,squeeze(mid(:,:,i))),grid2D.rq(:,1))
 
     contour(grid2D.zq(1,:),grid2D.rq(:,1),squeeze(data2D.psi(:,:,i)),20,'black')
 
     % contour(grid2D.zq(1,:),grid2D.rq(:,1),squeeze(data2D.psi(:,:,i)),[-20e-3:0.2e-3:40e-3],'black','LineWidth',1)
-%     plot(grid2D.zq(1,squeeze(mid(opoint(:,:,i),:,i))),grid2D.rq(opoint(:,:,i),1),"bo")
-%     plot(grid2D.zq(1,squeeze(mid(xpoint(:,:,i),:,i))),grid2D.rq(xpoint(:,:,i),1),"bx")
-     % plot(ok_z,ok_r,"k.",'MarkerSize', 6)%測定位置
+    % plot(grid2D.zq(1,squeeze(mid(opoint(:,:,i),:,i))),grid2D.rq(opoint(:,:,i),1),"bo")
+    % plot(grid2D.zq(1,squeeze(mid(xpoint(:,:,i),:,i))),grid2D.rq(xpoint(:,:,i),1),"bx")
+    %  plot(ok_z,ok_r,"k.",'MarkerSize', 6)%測定位置
 
     % timeIndex = find(trange==t);
     % [magaxis,xpoint] = get_axis_x(grid2D,data2D,t);
@@ -145,12 +149,29 @@ times = trange(1)+start:dt:trange(1)+start+dt*15;
     end
     hold off
     title(string(t)+' us')
-%     xlabel('z [m]')
-%     ylabel('r [m]')
+    xlabel('z [m]')
+    ylabel('r [m]')
  end
-
  sgtitle(strcat('shot',num2str(shot)));
 
+if ismember(PCB.type, [1, 2, 3, 4, 5, 6])
+    cb = colorbar;
+    cb.Layout.Tile = 'east';
+    switch(PCB.type)
+        case 1
+            cb.Label.String = '\psi [Wb]';
+        case 2
+            cb.Label.String = 'B_z [T]';
+        case 3
+            cb.Label.String = 'B_t [T]';
+        case 4
+            cb.Label.String = 'B_r [T]';
+        case 5
+            cb.Label.String = 'E_t [V/m]';
+        case 6
+            cb.Label.String = 'J_t [A/m^{2}]';
+    end
+end
  if PCB.type==5
      figure;plot(times,Et_t,'LineWidth',3);
      ax = gca;

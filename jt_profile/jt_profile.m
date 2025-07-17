@@ -1,0 +1,150 @@
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % jt profile
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% clear all;
+% 
+% % Case-I
+% dateI = '240610';
+% load('G:\My Drive\lab\lab_data\pre_processed\a039_4290.mat');
+% % target_timesI = [88, 90, 92, 94, 96, 98, 100];
+% % target_timesI = [93, 107, 121];
+% target_timesI = [86, 88, 90, 92, 94];
+% 
+% % Case-O
+% dateO = '240611';
+% load('G:\My Drive\lab\lab_data\pre_processed\a039_4374.mat');
+% % target_timesO = [78, 84, 86, 91, 93, 94, 96];
+% % target_timesO = [89, 94, 99];
+% target_timesO = [86, 88, 89, 90, 92, 94];
+% 
+% % グリッドデータ (r方向)
+% r = grid2D.rq; % r方向のグリッド
+% 
+% % ウィンドウ作成
+% figure;
+% 
+% % --- Case-I のプロット ---
+% subplot(1, 2, 1); % 左側に配置
+% for t_idx = 1:length(target_timesI)
+%     target_time = target_timesI(t_idx);
+% 
+%     % 必要なデータを取得
+%     Jt = data2D.Jt(:, :, target_time);
+% 
+%     % プロット (z = 0) caseI
+%     plot(r(:,1), Jt(:, 20), 'DisplayName', ['t=', num2str(target_time+399), 'us'], 'LineWidth', 3);
+%     hold on;
+% end
+% xlabel('r [m]', 'FontSize', 14);
+% ylabel('j_{t} [A/m^{2}]', 'FontSize', 14);
+% xlim([0.05 0.35]);
+% ylim([-4e5 8e5]);
+% % title('Case-I', 'FontSize', 14);
+% legend('FontSize', 10, 'Location', 'northwest');
+% yline(0, '--', 'HandleVisibility', 'off'); % y=0ライン
+% 
+% % --- Case-O のプロット ---
+% subplot(1, 2, 2); % 右側に配置
+% for t_idx = 1:length(target_timesO)
+%     target_time = target_timesO(t_idx);
+% 
+%     % 必要なデータを取得
+%     Jt = data2D.Jt(:, :, target_time);
+% 
+%     % プロット (z = 0) caseO
+%     plot(r(:,1), Jt(:, 20), 'DisplayName', ['t=', num2str(target_time+399), 'us'], 'LineWidth', 3);
+%     hold on;
+% end
+% xlabel('r [m]', 'FontSize', 14);
+% ylabel('j_{t} [A/m^{2}]', 'FontSize', 14);
+% xlim([0.05 0.35]);
+% ylim([-4e5 8e5]);
+% % title('Case-O', 'FontSize', 14);
+% legend('FontSize', 10, 'Location', 'northwest');
+% yline(0, '--', 'HandleVisibility', 'off'); % y=0ライン
+% 
+% % 図を保存
+% saveFolder = "G:\My Drive\lab\lab_data\mach_probe\jt_profile";
+% saveas(gcf, strcat(saveFolder, '\comparison_caseI_caseO_subplot_', num2str(dateI), '_', num2str(dateO), '.png'), 'png');
+% 
+% fprintf("Saved your file for %s and %s\n", dateI, dateO);
+
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% jt profile
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% clear all;
+
+% Case-I
+dateI = '240610';
+load('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\processed_data\240610018.mat');
+% load('G:\My Drive\lab\lab_data\pre_processed\a039_4290.mat');
+data2D_caseI = data2D; % Case-I 用にデータを保存
+% target_timesI = [86, 88, 90, 92, 94, 97, 99, 102];
+% target_timesI = [93, 107, 121];
+target_timesI = [93, 107, 121];
+
+% Case-O
+dateO = '240611';
+load('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\processed_data\240611055.mat');
+% load('G:\My Drive\lab\lab_data\pre_processed\a039_4374.mat');
+data2D_caseO = data2D; % Case-O 用にデータを保存
+% target_timesO = [86, 88, 89, 90, 92, 94, 99, 101];
+target_timesO = [89, 94, 99];
+% target_timesO = [80, 90, 100];
+
+
+% グリッドデータ (r方向)
+r = grid2D.rq; % r方向のグリッド
+
+% ウィンドウ作成
+figure;
+
+% --- Case-I のプロット ---
+subplot(1, 2, 1); % 左側に配置
+for t_idx = 1:length(target_timesI)
+    target_time = target_timesI(t_idx);
+
+    % 必要なデータを取得 (Case-I)
+    Jt = data2D_caseI.Jt(:, :, target_time);
+
+    % プロット (z = 0) caseI
+    plot(r(:,1), (Jt(:, 10)+Jt(:, 11))./2, 'DisplayName', ['t=', num2str(target_time+399), 'us'], 'LineWidth', 3);
+    hold on;
+end
+xlabel('r [m]', 'FontSize', 14);
+ylabel('j_{t} [A/m^{2}]', 'FontSize', 10);
+xlim([0.05 0.35]);
+ylim([-8e5 8e5]);
+% title('Case-I', 'FontSize', 14);
+legend('FontSize', 10, 'Location', 'northwest');
+yline(0, '--', 'HandleVisibility', 'off'); % y=0ライン
+
+% --- Case-O のプロット ---
+subplot(1, 2, 2); % 右側に配置
+for t_idx = 1:length(target_timesO)
+    target_time = target_timesO(t_idx);
+
+    % 必要なデータを取得 (Case-O)
+    Jt = data2D_caseO.Jt(:, :, target_time);
+
+    % プロット (z = 0) caseO
+    plot(r(:,1), (Jt(:, 12)+Jt(:, 12))./2, 'DisplayName', ['t=', num2str(target_time+399), 'us'], 'LineWidth', 3);
+    hold on;
+end
+xlabel('r [m]', 'FontSize', 14);
+ylabel('j_{t} [A/m^{2}]', 'FontSize', 14);
+xlim([0.05 0.35]);
+ylim([-4e5 4e5]);
+% title('Case-O', 'FontSize', 14);
+legend('FontSize', 10, 'Location', 'northwest');
+yline(0, '--', 'HandleVisibility', 'off'); % y=0ライン
+
+% 図を保存
+saveFolder = "C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\jt_profile\figure";
+saveas(gcf, strcat(saveFolder, ...
+    '\caseI_', num2str(dateI), '_', num2str(399+target_timesI(1)), '-', num2str(399+target_timesI(end)), 'us_', ...
+    'caseO_', num2str(dateO), '_', num2str(399+target_timesO(1)), '-', num2str(399+target_timesO(end)), 'us', '.png'), 'png');
+
+fprintf("Saved your file for %s and %s\n", dateI, dateO);

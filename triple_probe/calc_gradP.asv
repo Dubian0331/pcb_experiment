@@ -1,0 +1,74 @@
+%% ========================================================================
+%  圧力勾配(grad P)を全時間について計算し、MATファイルに保存する
+% =========================================================================
+clear; close all; clc;
+
+% --- ユーザー設定 ---
+date = 240610; % or 240611
+fprintf('Processing date: %d\n', date);
+
+% --- 1. 必要なデータをロード ---
+% トリプルプローブの計算結果 (Te, ne) をロード
+
+if MP.date == 240610 % Case-I
+    te_mat_path = 'C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\triple_probe\mat\240610\triple_data2D_Case-I.mat';
+elseif MP.date == 240611 % Case-O
+    te_mat_path = 'C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\triple_probe\mat\240611\triple_data2D_Case-O.mat';
+else
+tp_mat_path = fullfile('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\triple_probe\mat', num2str(date), ['triple_data2D_case-', lower(T.case{1}), '.mat']);
+load(tp_mat_path, 'triple_data2D', 'R_values', 'time_values');
+Te_data_eV = squeeze(triple_data2D.Te_avg);
+ne_data = squeeze(triple_data2D.ne_avg);
+
+% マッハプローブの計算結果 (I_ratio) をロード
+mp_mat_path = fullfile('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\MachProbe_data\mat', num2str(date), '18-41_Iratio.mat'); % ファイル名は適宜調整
+load(mp_mat_path, 'MPdata2D');
+I_ratio_at_z0 = squeeze(MPdata2D.I_ratio_forplot(:, :, find(abs(MPdata2D.zq(1,:)) < 1e-9, 1)));
+
+% --- 2. グリッドの整合と圧力勾配の計算 ---
+fprintf('Aligning grids and calculating pressure gradient...\n');
+
+% I_ratioとTe/neのグリッドを合わせるため、Te/neをI_ratioのグリッドに補間
+[T_orig_grid, R_orig_grid] = meshgrid(time_values, R_values);
+[T_target_grid, R_target_grid] = meshgrid(MPdata2D.trange, MPdata2D.rq(:,1));
+
+Te_aligned_eV = interp2(T_orig_grid, R_orig_grid, Te_data_eV, T_target_grid, R_target_grid, 'linear');
+ne_aligned = interp2(T_orig_grid, R_orig_grid, ne_data, T_target_grid, R_target_grid, 'linear');
+
+% 転置して (時間, R) の次元に揃える
+Te_aligned_eV = Te_aligned_eV.';
+ne_aligned = ne_aligned.';
+
+% 物理定数
+k_B = 1.380649e-23;
+K2ev = 11604.5250061657;
+
+% 圧力 Pe = ne * kB * Te を計算
+Te_aligned_K = Te_aligned_eV * K2ev;
+Te_aligned_K(Te_aligned_K < 0) = 0; % 補間による負の値を補正
+Pe_matrix = ne_aligned .* (k_B * Te_aligned_K);
+
+% 全ての時間について、R方向の圧力勾配を計算
+num_times = length(MPdata2D.trange);
+num_radii = length(MPdata2D.rq(:,1));
+grad_P_2D = zeros(num_times, num_radii);
+
+for t_idx = 1:num_times
+    P_vs_R_profile = Pe_matrix(t_idx, :);
+    % R座標ベクトル MPdata2D.rq(:,1) を使って勾配を計算
+    grad_P_vs_R = gradient(P_vs_R_profile, MPdata2D.rq(:,1));
+    grad_P_2D(t_idx, :) = grad_P_vs_R;
+end
+
+% --- 3. 計算結果をMATファイルに保存 ---
+% 保存する変数を定義
+time_axis = MPdata2D.trange;
+R_axis = MPdata2D.rq(:,1); % R座標軸
+
+save_folder = fullfile('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\processed_data\');
+if ~exist(save_folder, 'dir'), mkdir(save_folder); end
+savename = fullfile(save_folder, ['grad_P_data_', num2str(date), '.mat']);
+
+save(savename, 'grad_P_2D', 'time_axis', 'R_axis');
+
+fprintf('圧力勾配データを保存しました: %s\n', savename);

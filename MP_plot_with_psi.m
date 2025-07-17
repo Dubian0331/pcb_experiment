@@ -54,6 +54,7 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
             cb.Layout.Tile = 'east';
             cb.FontSize = 14;
             cb.Label.String = 'Vt [km/s]';
+            drawnow;
         otherwise
             return
     end
