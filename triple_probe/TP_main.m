@@ -1,7 +1,7 @@
 %% ========================================================================
 %  トリプルプローブデータ解析 メイン実行ファイル
 % =========================================================================
-clear; close all; clc;
+% clear; close all; clc;
 
 %% ------------------------------------------------------------------------
 %  ユーザー設定
@@ -46,87 +46,6 @@ fprintf('Processing data for %s (Date: %d)...\n', case_name, date);
 
 fprintf('Data processing complete. MAT file saved to: %s\n', matFileName);
 
-%% --- ★★★ 追加: プラズマ圧力の計算とプロット ★★★
-fprintf('Calculating and plotting plasma pressure...\n');
-
-% --- 1. 圧力計算の準備 ---
-k_B = 1.380649e-23; % ボルツマン定数 [J/K]
-K2ev = 11604.5250061657; % eVからKelvinへの変換係数
-
-% 電子温度をeVから絶対温度(Kelvin)に変換
-Te_matrix_K = Te_matrix_eV * K2ev;
-
-% --- 2. プラズマ圧力 (電子) を計算 ---
-% Pe = ne * kB * Te [単位: Pa]
-Pe_matrix = ne_matrix .* (k_B * Te_matrix_K);
-
-% --- 3. 圧力のカラーコンタープロットを作成 ---
-figure('Name', [case_name, ' Plasma Pressure Plot']);
-
-% グリッドデータを作成
-[T_grid, R_grid] = meshgrid(time_values, R_values);
-
-% データをプロット
-contourf(T_grid, R_grid, Pe_matrix, 100, 'LineColor', 'none');
-
-% カラーバーとラベル
-cb = colorbar;
-cb.Title.String = 'P_e [Pa]';
-colormap('jet');
-% clim([0, 300]); % 必要に応じてカラーマップの範囲を手動で調整
-
-% 軸ラベルとタイトル
-xlabel('Time [\mus]');
-ylabel('R [m]');
-title([case_name, ' plot of Electron Pressure [Pa]']);
-set(gca, 'FontSize', 12);
-
-% 表示範囲 (既存のプロット設定を流用)
-xlim([470, 510]);
-ylim([0.1, 0.3]);
-
-fprintf('Plasma pressure plot generated.\n');
-% --- 追加部分ここまで ---
-
-%% --- ★★★ 追加: 特定時刻での圧力勾配(grad P)のプロット（複数） ★★★
-
-% --- 1. プロットしたい時刻をリストで指定 [µs] ---
-target_times = [480, 485, 490, 495]; 
-
-fprintf('指定された各時刻の圧力勾配をプロットします...\n');
-
-% --- 2. 指定した各時刻でループ処理 ---
-for i = 1:length(target_times)
-    
-    current_target_time = target_times(i);
-    
-    % a) 指定した時刻に最も近い、実際の時間軸上のインデックスを探す
-    [~, time_index] = min(abs(time_values - current_target_time));
-    actual_time = time_values(time_index); % 実際に抜き出す時刻
-    
-    % b) その時刻の圧力プロファイル（R方向の分布）を抜き出す
-    P_vs_R_profile = Pe_matrix(:, time_index);
-    
-    % c) R方向の圧力勾配 (dP/dR) を計算
-    grad_P = gradient(P_vs_R_profile, R_values);
-    
-    % d) 新しいfigureを作成してプロット
-    figure('Name', ['Pressure Gradient at t = ', num2str(actual_time), ' us']);
-    
-    plot(R_values, grad_P, '-o', 'LineWidth', 1.5);
-    grid on;
-    hold on;
-    yline(0, 'k--', 'HandleVisibility', 'off'); % ゼロのライン
-    hold off;
-
-    % ラベルとタイトル
-    xlabel('Radius (R) [m]');
-    ylabel('Pressure Gradient (grad P) [Pa/m]');
-    title(['Radial Pressure Gradient at t = ', num2str(actual_time), ' \mus']);
-    
-end
-
-disp('圧力勾配のプロットが完了しました。');
 %% ------------------------------------------------------------------------
 %  2次元プロットの生成と保存
 % -------------------------------------------------------------------------

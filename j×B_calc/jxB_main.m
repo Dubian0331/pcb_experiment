@@ -27,20 +27,20 @@
 date = 240611;
 load('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\processed_data\240611055.mat');
 load('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\triple_probe\mat\240611\grad_P_data_240611.mat');
-z_index = 10; % プロットするzの位置 (z=0に対応)
+z_index = 11; % プロットするzの位置 (z=0に対応)
 
 % --- プロットのタイミングを設定 ---
 start_time_us = 480; % プロットを開始する時刻 [us]
 time_step_us = 1;    % プロットの時間間隔 [us]
 num_plots_y = 5;     % 縦に並べるプロット数
 num_plots_x = 6;     % 横に並べるプロット数
-isSave = true; % 画像を保存するかどうか
+isSave = false; % 画像を保存するかどうか
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% --- プロット処理 ---
 figure('WindowState', 'maximized');
-r_axis_jxb = grid2D.rq(:,1); % JxBのR座標軸
-jxb_time_axis = (data2D.trange(1):data2D.trange(end)); % JxBの時間軸 (1us刻み)
+r_axis_jxb = grid2D.rq(:,1); % JxBのR座標軸 (r)
+jxb_time_axis = data2D.trange; % JxBの時間軸 (t)
 
 total_plots = num_plots_y * num_plots_x;
 for plot_idx = 1:total_plots
@@ -50,38 +50,67 @@ for plot_idx = 1:total_plots
     hold on;
     grid on;
     
-    % --- JxBのデータを、指定した時刻(time_in_us)に線形補間 ---
-    Jt_vs_time = squeeze(data2D.Jt(:, z_index, :)); % (R, Time)
-    Bz_vs_time = squeeze(data2D.Bz(:, z_index, :));
+    % --- JxBの全方向計算 ---
+    % 1. 指定した時刻に最も近いインデックスを探す
+    [~, target_time] = min(abs(jxb_time_axis - time_in_us));
+
+    % 2. 必要なJとBの全成分データを取得 (次元は r, z)
+    Jr = data2D.Jr(:, :, target_time);
+    Jt = data2D.Jt(:, :, target_time);
+    Jz = data2D.Jz(:, :, target_time);
+    Br = data2D.Br(:, :, target_time);
+    Bt = data2D.Bt(:, :, target_time);
+    Bz = data2D.Bz(:, :, target_time);
+
+    % 3. ベクトル化して外積を効率的に計算
+    J_vectors = [Jr(:), Jt(:), Jz(:)];
+    B_vectors = [Br(:), Bt(:), Bz(:)];
+    j_B_force_vectors = cross(J_vectors, B_vectors, 2);
+
+    % 4. r方向(半径方向)の成分を抜き出す
+    j_B_r_raw = j_B_force_vectors(:, 1); % 1番目の列がr成分
+    j_B_r_2D = reshape(j_B_r_raw, size(Jr));
+    % jt×Bzのみ
+    j_t_B_z_term = (Jt .* Bz) / 1000; % [kN/m^3]
+    jtbz_term_to_plot = j_t_B_z_term(:, z_index);
+    % jz×Btのみ
+    j_z_B_t_term = (-Jz .* Bt) / 1000;
+    jzb_term_to_plot = j_z_B_t_term(:, z_index);
+
+    % 5. プロット用にzの位置でスライスし、単位を変換
+    jxb_r_to_plot = j_B_r_2D(:, z_index) / 1000; % [kN/m^3] に変換
+
+    % 6. r方向成分をプロット
+    plot(r_axis_jxb, jxb_r_to_plot, 'b-', 'LineWidth', 1.5, 'DisplayName', '(J×B)_r');
     
-    % interp1を使って各R点で時間補間
-    Jt_interp = interp1(jxb_time_axis, Jt_vs_time.', time_in_us).';
-    Bz_interp = interp1(jxb_time_axis, Bz_vs_time.', time_in_us).';
-    jxb_to_plot = (Jt_interp .* Bz_interp) / 1000; % [kN/m^3]
+    % --- grad Pのプロット---
+    [~, grad_P_time_idx] = min(abs(time_axis - time_in_us));
+    grad_P_to_plot = grad_P_2D(grad_P_time_idx, :);
+    grad_P_aligned = interp1(R_axis, -grad_P_to_plot, r_axis_jxb, 'pchip', 'extrap') / 1000;
     
-    plot(r_axis_jxb, jxb_to_plot, 'b-', 'LineWidth', 1, 'DisplayName', 'J_tB_z');
+    % plot(r_axis_jxb, grad_P_aligned, 'r--', 'LineWidth', 1.5, 'DisplayName', '-∇P_r');
+
+    plot(r_axis_jxb, jtbz_term_to_plot, 'g:', 'LineWidth', 2, 'DisplayName', 'J_tB_z term');
+
+    plot(r_axis_jxb, jzb_term_to_plot, 'm-.', 'LineWidth', 2, 'DisplayName', '-J_zB_t term');
     
-    % --- grad Pのデータを、指定した時刻(time_in_us)に線形補間 ---
-    % こちらは時間分解能が高いので、補間精度も高い
-    grad_P_interp = interp1(time_axis, grad_P_2D, time_in_us);
-    
-    % R軸をJxBのR軸に合わせる
-    grad_P_aligned = interp1(R_axis, -grad_P_interp, r_axis_jxb, 'pchip') / 1000;
-    
-    plot(r_axis_jxb, grad_P_aligned, 'r', 'LineWidth', 1, 'DisplayName', '-grad P');
-    
-    % --- 和のプロット ---
-    force_sum = jxb_to_plot + grad_P_aligned;
-    plot(r_axis_jxb, force_sum, 'k--', 'LineWidth', 1, 'DisplayName', 'Sum');
+    % --- 和のプロット (力の釣り合いを確認) ---
+    force_sum = jxb_r_to_plot + grad_P_aligned;
+    % plot(r_axis_jxb, force_sum, 'k-', 'LineWidth', 2, 'DisplayName', 'Sum');
     
     % --- グラフ装飾 ---
     yline(0, 'k-', 'HandleVisibility', 'off');
     title(['t = ', num2str(time_in_us), ' us']);
     if plot_idx == 1, legend('FontSize', 7); end
     if plot_idx > total_plots - num_plots_x, xlabel('r [m]'); end
-    if mod(plot_idx - 1, num_plots_x) == 0, ylabel('Force [kN/m^3]'); end
+    if mod(plot_idx - 1, num_plots_x) == 0
+        ylabel('j×B vs grad P [kN/m^3]');
+    end
 end
-sgtitle(['Force Balance Analysis for Date: ', date], 'FontSize', 16, 'FontWeight', 'bold');
+
+% 全体タイトル
+sgtitle(['Force Balance Analysis (Radial Component) for Date: ', num2str(date)], 'FontSize', 16, 'FontWeight', 'bold');
+
 
 % --- 画像保存処理 ---
 if isSave

@@ -91,7 +91,7 @@ TFlist=T.TF_kV_(IDXlist);
 dtacqlist=39.*ones(n_data,1);
 
 PCB.trange=400:800;%【input】計算時間範囲k
-PCB.n=20; %【input】rz方向のメッシュ数
+PCB.n=40; %【input】rz方向のメッシュ数
 PCB.start = 70; %plot開始時間-400
 PCB.dt = 4;
 
