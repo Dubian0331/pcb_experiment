@@ -1,5 +1,5 @@
 %%% cal flow with mean & sem %%%
-function MPdata2D = MP_calc(pathname,MP, MPset)
+function MPdata2D = MP_calc(pathname, savepath, MP, MPset)
 n_ch = 9;%マッハプローブCH数
 
 % 保存してあるものを使うならコメンならコメントアウト解除
@@ -79,6 +79,9 @@ n_ch = 9;%マッハプローブCH数
     for i = 1:numel(MP.trange)
         MPdata2D.flow_forplot(i,:,:) = griddata(z_probe,r_probe,squeeze(flow_mean(i,:,:))',MPdata2D.zq,MPdata2D.rq);
     end
-    savename = strcat(pathname, '\', num2str(MP.date),'\', shotnum, '_', num2str(MP.trange(1)*10), '-', num2str(MP.trange(end)*10), '.mat');
-    save(savename,'MPdata2D')
+
+    % matファイルへの保存
+    filename = string(MP.date) + "_MP.mat";
+    savename = fullfile(savepath, 'mat' ,filename);
+    save(savename, 'MPdata2D');
 % end

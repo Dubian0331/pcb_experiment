@@ -1,4 +1,4 @@
-function [] = MP_plot(MP,MPdata2D,colorplot,date)
+function [] = MP_plot(MP, MPdata2D, colorplot, date, savepath)
 axisfontsize = 8;
 switch colorplot
     case {'flow_t'}
@@ -35,10 +35,9 @@ switch colorplot
     otherwise
         return
 end
-save_filepath = "C:\\Users\\w-har\\OneDrive - The University of Tokyo\\Lab\\pcb_experiment\\MachProbe_data";
-    min_shots_num = min(MP.shotlist);
-    max_shots_num = max(MP.shotlist);
-    mkdir(strcat(save_filepath, '\', num2str(date), '\output'));
-    saveas(gcf, strcat(save_filepath, '\', num2str(date), '\output\', num2str(min_shots_num), '-', num2str(max_shots_num), '_', num2str(MP.dt), '-us_mesh_', num2str(MP.mesh), '_mesh_r_', num2str(MP.meshr)), 'png');
+min_shots_num = min(MP.shotlist);
+max_shots_num = max(MP.shotlist);
+mkdir(strcat(savepath, '\', num2str(date), '\output'));
+saveas(gcf, strcat(savepath, '\', num2str(date), '\output\', num2str(min_shots_num), '-', num2str(max_shots_num), '_', num2str(MP.dt), '-us_mesh_', num2str(MP.mesh), '_mesh_r_', num2str(MP.meshr)), 'png');
 end
 

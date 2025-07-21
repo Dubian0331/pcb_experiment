@@ -1,4 +1,4 @@
-function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
+function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D, savepath)
     axisfontsize = 14;
     clim_values = [-40 40];  % カラーマップの範囲を指定
     
@@ -10,13 +10,13 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
             figure('Position', [0 0 800 800],'visible','on', WindowState='maximized');
             tiledlayout(MP.tate, MP.yoko, 'TileSpacing', 'compact', 'Padding', 'compact');
             for i = 1:MP.tate * MP.yoko
-                offset_t = 1; % 何番目の要素からプロットを始めるか、基本的には1
+                [~, offset_t] = min(abs(MP.trange - MP.plotstart)); % 指定した値からプロットを始める
                 offset_mag_t = 399;
                 idx_t = offset_t + (i - 1) * MP.dt * 10;
                 nexttile
                 hold on
                 contourf(MPdata2D.zq, MPdata2D.rq, squeeze(MPdata2D.flow_forplot(idx_t, :, :)), 100, 'edgecolor', 'none');
-                contourf(grid2D.zq, grid2D.rq, data2D.psi(:, :, MP.trange(idx_t) - 399), -6e-3:0.4e-3:6e-3, 'k', 'Fill', 'off', 'LineWidth', 1);
+                contourf(grid2D.zq, grid2D.rq, data2D.psi(:, :, MP.trange(idx_t) - offset_mag_t), -6e-3:0.4e-3:6e-3, 'k', 'Fill', 'off', 'LineWidth', 1);
                 colormap(redblue(300))
                 clim(clim_values)
                 disp([num2str(data2D.trange(MP.trange(idx_t) - 399)), ', ', num2str(MPdata2D.trange(idx_t))]);
@@ -58,12 +58,10 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D)
         otherwise
             return
     end
-
-    save_filepath = 'C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\MachProbe_data';
     min_shots_num = min(MP.shotlist);
     max_shots_num = max(MP.shotlist);
 
     % --- 保存 ---
-    mkdir(strcat(save_filepath, '\', num2str(date), '\output'));
-    saveas(gcf, strcat(save_filepath, '\', num2str(date), '\output\', num2str(min_shots_num), '-', num2str(max_shots_num), '_', num2str(MP.dt), 'us_', num2str(MP.start) ,'us-_mesh_', num2str(MP.mesh), '_mesh_r_', num2str(MP.meshr)), 'png');
+    mkdir(strcat(savepath, '\figure\', num2str(date)));
+    saveas(gcf, strcat(savepath, '\figure\', num2str(date), '\', num2str(min_shots_num), '-', num2str(max_shots_num), '_', num2str(MP.dt), 'us_', num2str(MP.plotstart) ,'us-_mesh_', num2str(MP.mesh), '_mesh_r_', num2str(MP.meshr)), 'png');
 end
