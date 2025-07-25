@@ -8,12 +8,12 @@ clear all
 clc
 
 % データとして採用するショット番号: case-I, 240610
-% MP.date = 240610;%【input】マッハプローブ計測日
-% MP.shotlist = [18, 20, 23, 26:27, 31:33, 35:38, 40:41, 44, 47];
+MP.date = 240610;%【input】マッハプローブ計測日
+MP.shotlist = [18, 20, 23, 26:27, 31:33, 35:38, 40:41, 44, 47];
 
 % データとして採用するショット番号: case-O, 240611
-MP.date = 240611;%【input】マッハプローブ計測日
-MP.shotlist = [47, 48, 51:52, 54:60, 62, 65:70];
+% MP.date = 240611;%【input】マッハプローブ計測日
+% MP.shotlist = [47, 48, 51:52, 54:60, 62, 65:70];
 
 MP.delay = 0;  % トリガタイミングの時間ずれ（オシロスコープ）
 MP.start = 480 + MP.delay;  %【input】プロット開始時刻[us]
@@ -31,10 +31,10 @@ MP.start = 470;
 MP.end = 530;
 MP.trange = MP.start:MP.scandt:MP.end;  %【input】計算時間範囲
 
-% MP.ng_ch = [3, 4, 5, 7, 8, 9];
+MP.ng_ch = [3, 4, 5, 7, 8, 9];
 % MP.ng_ch = [2, 3, 4, 5, 8, 9]; % 死んだCH 6/11
 % MP.ng_ch = [3, 4, 5, 8, 9]; % 死んだCH 6/10
-MP.ng_ch = [4, 5, 7, 8, 9];
+% MP.ng_ch = [4, 5, 7, 8, 9];
 MP.Vd2 = 40;  %【input】langmiur用の値（手前と書かれた方のバイアス電圧値）
 MP.Vd3 = 40;  %【input】langmiur用の値（奥と書かれた方のバイアス電圧値）
 colorplot = 'flow_t';  %【input】カラープロット種類('flow_t')
@@ -59,8 +59,10 @@ MPdata2D = MP_calc(machpathname, savepathname, MP, MPset);
 MP.tate = 1;  %【input】プロット枚数(縦)
 MP.yoko = 3;  %【input】プロット枚数(横)
 MP.plotstart = 484; %【input】プロット開始時間
-MP.dt = 6;  %【input】プロット時間間隔[us] plot_MP用
+MP.dt = 11;  %【input】プロット時間間隔[us] plot_MP用
 MP.dt2 = 5;  %【input】プロット時間間隔[us] plot_MP_r_flow用
+plotoptions.axisfontsize = 32;
+plotoptions.titlefontsize = 48;
 
 % ch = 6; % チャンネル(z位置)の指定
 % plot_MP_r_flow(MP, MPdata2D, ch)
@@ -68,13 +70,13 @@ MP.dt2 = 5;  %【input】プロット時間間隔[us] plot_MP_r_flow用
 
 % 磁気面と共にフローをプロット
 % Case-I: 磁気面
-% disp_shotnum = 18;
+disp_shotnum = 18;
 % Case-O: 磁気面
-disp_shotnum = 47;
+% disp_shotnum = 47;
 loadfile = fullfile('C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\processed_data', strcat(num2str(MP.date), sprintf('%03d', disp_shotnum), '.mat'));
 load(loadfile);
 disp(strcat('Loading ', loadfile, '...'));
-MP_plot_with_psi(MP,MPdata2D,colorplot, MP.date, data2D, grid2D, savepathname)
+MP_plot_with_psi(MP,MPdata2D,colorplot, MP.date, data2D, grid2D, savepathname, plotoptions)
 % movie_MP(machpathname,MP,MPdata2D,colorplot)
 %%
 % filename = strcat(pathname.pcbprocessed,'\a039_',num2str(shot(1)),'.mat');

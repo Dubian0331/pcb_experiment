@@ -1,5 +1,6 @@
-function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D, savepath)
-    axisfontsize = 14;
+function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D, savepath, plotoptions)
+    axisfontsize = plotoptions.axisfontsize;
+    titlefontsize = plotoptions.titlefontsize;
     clim_values = [-40 40];  % カラーマップの範囲を指定
     
     % タイルレイアウトを作成
@@ -26,7 +27,7 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D, sa
                 % [zprobe, rprobe] = meshgrid(zprobe, MPdata2D.rprobe);
                 % scatter(zprobe, rprobe, 20, 'black', 'filled')
                 hold on
-                title(['t=', num2str(MPdata2D.trange(idx_t) + MP.delay),' us'], 'FontSize', 14)
+                title(['t=', num2str(MPdata2D.trange(idx_t) + MP.delay),' us'], 'FontSize', titlefontsize)
 
                 % X軸とY軸のラベルを設定
                 if mod(i, MP.yoko) == 1
@@ -42,7 +43,7 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D, sa
                     xticks([-0.08 -0.032 0 0.032 0.08])
                     xlabel('z [m]', 'FontSize', axisfontsize);
                 else
-                    set(gca, 'XTickLabel', []);
+                    set(gca, 'XTickLabel', [], 'FontSize', titlefontsize);
                 end
 
                 xlim([-0.08 0.08])
@@ -52,7 +53,7 @@ function [] = MP_plot_with_psi(MP, MPdata2D, colorplot, date, data2D, grid2D, sa
             % 共通のカラーバーを設定
             cb = colorbar;
             cb.Layout.Tile = 'east';
-            cb.FontSize = 14;
+            cb.FontSize = axisfontsize;
             cb.Label.String = 'Vt [km/s]';
             drawnow;
         otherwise
