@@ -8,16 +8,16 @@ clc;
 %% ★★★ ユーザー設定 ★★★
 % --- 解析対象のケース ---
 % Case-I
-MP.date = 240610;
-disp_shotnum = 18;
-MP.shotlist = [18, 20, 23, 26:27, 31:33, 35:38, 40:41, 44, 47];
-MP.ng_ch = [3, 4, 5, 7, 8, 9];
+% MP.date = 240610;
+% disp_shotnum = 18;
+% MP.shotlist = [18, 20, 23, 26:27, 31:33, 35:38, 40:41, 44, 47];
+% MP.ng_ch = [3, 4, 5, 7, 8, 9];
 
 % % Case-O
-% MP.date = 240611;
-% disp_shotnum = 47;
-% MP.shotlist = [47, 48, 51:52, 54:60, 62, 65:70];
-% MP.ng_ch = [4, 5, 7, 8, 9];
+MP.date = 240611;
+disp_shotnum = 47;
+MP.shotlist = [47, 48, 51:52, 54:60, 62, 65:70];
+MP.ng_ch = [4, 5, 7, 8, 9];
 
 % --- その他の設定 ---
 machpathname = 'C:\Users\w-har\OneDrive - The University of Tokyo\Lab\pcb_experiment\mach_probe_data';
@@ -42,16 +42,15 @@ MPdata2D = MP_calc(machpathname, savepathname, MP, MPset);
 
 %% --- 2. プロット関数の呼び出し ---
 % プロット設定
-plotoptions.times_to_plot = [484, 495, 506];
-plotoptions.axisfontsize = 16;
+plotoptions.times_to_plot = [484, 490, 497];
+plotoptions.axisfontsize = 18;
 plotoptions.titlefontsize = 18;
-plotoptions.isSave = true;
+plotoptions.isSave = false;
 
 MP_plot_with_psi_specific_times(MP, MPdata2D, data2D, grid2D, savepathname, plotoptions);
 
-%% ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+%% 
 %  ここより下はローカル関数です。
-% ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
 function MP_plot_with_psi_specific_times(MP, MPdata2D, data2D, grid2D, savepath, plotoptions)
     % --- 1. プロット準備 ---
@@ -69,7 +68,7 @@ function MP_plot_with_psi_specific_times(MP, MPdata2D, data2D, grid2D, savepath,
     end
 
     % Figureサイズをsubplot数に応じて自動調整
-    base_width = 400; base_height = 450; top_margin = 100;
+    base_width = 300; base_height = 400; top_margin = 100;
     fig_width = base_width * num_cols;
     fig_height = base_height * num_rows + top_margin;
     screen_size = get(0, 'ScreenSize');
@@ -99,6 +98,7 @@ function MP_plot_with_psi_specific_times(MP, MPdata2D, data2D, grid2D, savepath,
         hold off;
         
         % グラフ装飾
+        set(gca, "FontSize", plotoptions.axisfontsize);
         colormap(redblue(300));
         clim([-40 40]);
         title([num2str(time_in_us),' us'], 'FontSize', plotoptions.titlefontsize);
@@ -106,23 +106,46 @@ function MP_plot_with_psi_specific_times(MP, MPdata2D, data2D, grid2D, savepath,
         % 軸ラベル (外側のみ表示)
         current_tile = gca;
         if current_tile.Layout.Tile > num_plots - num_cols
-            xlabel('z [m]', 'FontSize', plotoptions.axisfontsize);
+            xlabel('z [m]', 'FontSize', plotoptions.titlefontsize);
+        else
+            set(gca, 'XTickLabel', []);
         end
         if mod(current_tile.Layout.Tile - 1, num_cols) == 0
-            ylabel('r [m]', 'FontSize', plotoptions.axisfontsize);
+            ylabel('r [m]', 'FontSize', plotoptions.titlefontsize);
+        else
+            set(gca, 'YTickLabel', []);
         end
         
         xlim([-0.08 0.08]);
         ylim([0.10 0.30]);
-        daspect([1 1 1]); % 縦横比を1:1に
+        daspect([1.3 1 1]); % 縦横比を1:1に
     end
     
     % 全体タイトルと共通カラーバー
-    sgtitle(['Flow Velocity & Psi Surfaces for Date: ', num2str(MP.date)], 'FontSize', 20, 'FontWeight', 'bold');
+    % sgtitle(['Flow Velocity & Psi Surfaces for Date: ', num2str(MP.date)], 'FontSize', 20, 'FontWeight', 'bold');
     cb = colorbar;
     cb.Layout.Tile = 'east';
-    cb.FontSize = plotoptions.axisfontsize;
-    cb.Label.String = 'Vt [km/s]';
+    % cb.Label.FontSize = plotoptions.titlefontsize;
+    % cb.Label.String = 'Vt [km/s]';
     
     % (保存処理は必要に応じてここに記述)
+    if plotoptions.isSave
+        
+        % 保存先の日付フォルダを作成
+        save_folder = fullfile(savepath, 'figure', num2str(MP.date));
+        if ~exist(save_folder, 'dir')
+            mkdir(save_folder);
+        end
+
+        % 時間範囲をファイル名用の文字列に変換
+        time_str = sprintf('%dus-%dus', min(times_to_plot), max(times_to_plot));
+        
+        % ファイル名を生成
+        save_filename = sprintf('vt_plot_%s.png', time_str);
+        full_save_path = fullfile(save_folder, save_filename);
+        
+        % Figureを保存
+        saveas(gcf, full_save_path);
+        fprintf('Figureを保存しました: %s\n', full_save_path);
+    end
 end
